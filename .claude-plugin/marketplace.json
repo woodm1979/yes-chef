@@ -1,5 +1,5 @@
 {
-  "name": "blueprint-dev",
+  "name": "blueprint",
   "description": "Planning and execution suite for Claude Code: brainstorm, blueprint, build, and TDD",
   "owner": {
     "name": "woodm1979",
