@@ -78,22 +78,14 @@ Grep the PLAN file for `**Status:** [ ] not started` (literal). The first match'
 
 If no match: announce "All sections complete" and stop.
 
-### Step 3 — Capture pre-section SHA, then dispatch implementer subagent
+### Step 3 — Dispatch section-controller subagent
 
-**First, capture the pre-section SHA.** Before dispatching, run:
+Dispatch a **section-controller** subagent (model: `sonnet`) that runs the full section lifecycle internally — implementer dispatch, both reviews, optional remediation — and returns a minimal structured result. Diffs and subagent responses never enter the orchestrator's context.
 
-```
-git rev-parse HEAD
-```
-
-Store this SHA — you'll need it in Step 4 to scope the diff. This is the parent of whatever commits the implementer will make.
-
-Determine the implementer's model from the section's `Model:` field (default `sonnet` if absent or malformed).
-
-Construct the implementer prompt using EXACTLY the template below. Don't embed your own reasoning or commentary; stick to plan content.
+Construct the section-controller prompt from EXACTLY the template below:
 
 ```
-You are implementing Section <N>: <Title> of a feature plan.
+You are a section-controller. You will orchestrate the full implementation lifecycle for Section <N>: <Title>. Dispatch an implementer subagent, run spec-compliance and code-quality reviews, handle remediation if needed, and return a structured result to the orchestrator. All workflow detail — diffs, subagent responses — stays in your context, not the orchestrator's.
 
 ## Repo root
 <absolute-path-to-repo-root>
@@ -101,7 +93,7 @@ You are implementing Section <N>: <Title> of a feature plan.
 ## Plan file
 <absolute-path-to-PLAN.md>
 
-## Architectural decisions (binding — apply to ALL sections of this plan)
+## Architectural decisions (binding — apply to ALL sections)
 <verbatim copy of the plan's "## Architectural decisions" block>
 
 ## Section <N>: <Title>
@@ -114,6 +106,41 @@ You are implementing Section <N>: <Title> of a feature plan.
 
 ### Notes for executor
 <verbatim copy>
+
+---
+
+## Phase 1 — Capture pre-section SHA
+
+Run `git rev-parse HEAD` and store the result as `pre_sha`. Pass this to reviewers so they can scope their diffs.
+
+## Phase 2 — Dispatch implementer subagent
+
+Determine the implementer model from the section's `Model:` field (default `sonnet`).
+
+Dispatch a general-purpose subagent with the implementer's model. Use this prompt (fill in placeholders from the section content above):
+
+---IMPLEMENTER PROMPT START---
+You are implementing Section <N>: <Title> of a feature plan.
+
+## Repo root
+<absolute-path-to-repo-root>
+
+## Plan file
+<absolute-path-to-PLAN.md>
+
+## Architectural decisions (binding — apply to ALL sections of this plan)
+<verbatim architectural decisions>
+
+## Section <N>: <Title>
+
+### What to build
+<verbatim>
+
+### Acceptance criteria
+<verbatim checkbox list>
+
+### Notes for executor
+<verbatim>
 
 ## Before you begin
 
@@ -129,28 +156,25 @@ Before writing any code, invoke the Skill tool with skill name `blueprint:tdd` t
 - Produce at least one commit when the section is done. Multiple commits are fine.
 - Before finishing, re-read this section's acceptance criteria and verify each one is satisfied.
 - Focus on Section <N>. You MAY read the plan file for context (prior sections' completion logs and deviations are useful). You MAY grep the shipped codebase freely — that's the ground truth for interfaces earlier sections built.
-- Do NOT pre-build anything for a section that hasn't started. Sections you haven't been assigned are not yours to anticipate — implementing them now is YAGNI. Add only what this section's acceptance criteria require.
+- Do NOT pre-build anything for sections that haven't started. Implementing them now is YAGNI. Add only what this section's acceptance criteria require.
 - If the plan is ambiguous or a decision isn't captured in the Architectural decisions block, stop and report back — do NOT fill the gap on your own.
 
 ## Code organization
 
 - Follow the file structure defined in the plan.
 - Each file should have one clear responsibility.
-- If a file you're creating is growing beyond the plan's intent, stop and report DONE_WITH_CONCERNS — don't restructure on your own without plan guidance.
+- If a file you're creating is growing beyond the plan's intent, stop and report DONE_WITH_CONCERNS.
 - In existing codebases, follow established patterns visible in the surrounding code.
 
 ## When you're in over your head
 
-It is always OK to stop and say "this is too hard for me." Bad work is worse than no work. You will not be penalized for escalating. STOP and escalate when:
-
+STOP and escalate when:
 - The section requires architectural decisions with multiple valid approaches not resolved by the plan.
 - You need to understand code beyond what was provided and can't find clarity.
 - You feel genuinely uncertain about whether your approach is correct.
 - You've been reading file after file without making progress.
 
 ## Before reporting back: self-review
-
-Review your work with fresh eyes:
 
 - **Completeness:** Did I satisfy every acceptance criterion? Any edge cases missed?
 - **Quality:** Is this my best work? Are names clear? Is code clean?
@@ -161,51 +185,38 @@ Fix issues now before reporting.
 
 ## Report back
 
-When done, report (briefly):
-
-1. **Status:** one of `DONE` | `DONE_WITH_CONCERNS` | `BLOCKED` | `NEEDS_CONTEXT`
+1. **Status:** `DONE` | `DONE_WITH_CONCERNS` | `BLOCKED` | `NEEDS_CONTEXT`
 2. Files created or modified (absolute paths)
 3. Commit SHA(s)
 4. Test count and whether the project's test runner passes
 5. Any deviations from the spec and why
-6. Any concerns (if `DONE_WITH_CONCERNS`) or the specific blocker (if `BLOCKED` / `NEEDS_CONTEXT`)
-```
+6. Any concerns or specific blocker
+---IMPLEMENTER PROMPT END---
 
-Use the `Agent` tool with `subagent_type: "general-purpose"`, the chosen model, and the prompt above.
+## Phase 2a — Handle implementer status
 
-### Step 3a — Handle implementer status
+- **DONE:** Proceed to Phase 3.
+- **DONE_WITH_CONCERNS:** Read the concerns. Address correctness/scope concerns before review; note observation-only concerns for the final result. Proceed to Phase 3.
+- **NEEDS_CONTEXT:** Provide missing context and re-dispatch. If the gap is cross-section, return `status: NEEDS_USER_INPUT` with the gap described.
+- **BLOCKED:** Context problem → re-dispatch with more context; needs more reasoning → re-dispatch with more capable model; section too large or plan wrong → return `status: BLOCKED`. Never re-dispatch unchanged.
 
-The implementer reports one of four statuses. Handle each appropriately before moving to review:
+## Phase 3 — Dispatch spec-compliance reviewer (opus)
 
-- **DONE:** Proceed to Step 4 (spec-compliance review).
-- **DONE_WITH_CONCERNS:** The implementer completed the work but flagged doubts. Read the concerns. If they're about correctness or scope, address them (re-dispatch with clarification, or fold into remediation) before review. If they're observations (e.g., "this file is getting large"), note them in the eventual completion log and proceed to review.
-- **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context — preferably by updating the plan file if the gap is cross-section, or inline if truly current-section-local — and re-dispatch.
-- **BLOCKED:** Assess the blocker:
-  1. If it's a context problem, provide more context and re-dispatch with the same model.
-  2. If the task requires more reasoning, re-dispatch with a more capable model.
-  3. If the section is too large, STOP and surface to the user — the plan likely needs to split this section.
-  4. If the plan itself is wrong, STOP and surface to the user to update the plan.
+Dispatch a general-purpose subagent with model `opus`. Use this prompt:
 
-**Never** silently ignore an escalation or force the same model to retry without changing something. If the implementer said it's stuck, something needs to change.
-
-### Step 4 — Dispatch spec-compliance reviewer (opus)
-
-After the implementer reports `DONE` (or concerns have been resolved), use the **pre-section SHA** you captured in Step 3 to scope the diff:
-
-```
-git log --oneline <pre-section-sha>..HEAD   # list section's commits
-git diff <pre-section-sha>..HEAD            # combined diff for review
-```
-
-The `<pre-section-sha>` is the commit that existed immediately before you dispatched the implementer — that's why you captured it before dispatch. For the very first section after `/build` begins, this is `HEAD` right after the `build: begin execution` commit from Step 1.
-
-Dispatch a reviewer with model `opus`:
-
-```
-You are a spec-compliance reviewer. Review the just-completed implementation of Section <N>: <Title> against its acceptance criteria. Flag only deviations from the spec — do NOT suggest improvements beyond it.
+---SPEC REVIEWER PROMPT START---
+You are a spec-compliance reviewer for Section <N>: <Title>. Flag only deviations from the spec — do NOT suggest improvements beyond it.
 
 ## Repo root
 <absolute-path>
+
+## Pre-section SHA: <pre_sha>
+
+Fetch the diff yourself before reviewing:
+  git log --oneline <pre_sha>..HEAD
+  git diff <pre_sha>..HEAD
+
+Read the actual diff. Do not rely on any summary of changes.
 
 ## Section <N>: <Title>
 
@@ -219,47 +230,43 @@ You are a spec-compliance reviewer. Review the just-completed implementation of 
 <verbatim>
 
 ## What the implementer claims they built
-<from the implementer's report>
-
-## The diff under review
-<inline diff, or `git show <sha>` for each commit in the section>
+<from implementer's report>
 
 ## CRITICAL: do not trust the report
 
-The implementer's report may be incomplete, inaccurate, or optimistic. Verify everything independently.
-
-DO NOT:
-- Take the implementer's word for what was built
-- Trust their claims about completeness
-- Accept their interpretation of requirements
+Verify by reading the actual diff you fetched. Do not trust the implementer's claims about completeness or correctness.
 
 DO:
-- Read the actual code they wrote
+- Read the actual code (use the diff you fetched above)
 - Compare actual implementation to acceptance criteria line by line
 - Check for missing pieces they claimed to implement
-- Look for extra features they didn't mention
+- Look for unrequested extras
 
 ## Output
 
-For each acceptance criterion, state PASS or FAIL with a one-line justification grounded in the actual code (cite file:line where useful). Also flag: any EXTRA behavior that wasn't requested (over-building), any binding architectural decision that was violated.
+For each acceptance criterion, state PASS or FAIL with a one-line justification (cite file:line where useful). Also flag: any EXTRA behavior not requested (over-building), any binding architectural decision violated.
 
 End with exactly one of:
 - `APPROVED`
 - `NEEDS FIXES` followed by a numbered list of fixes
-```
+---SPEC REVIEWER PROMPT END---
 
-### Step 5 — Dispatch code-quality reviewer (opus)
+## Phase 4 — Dispatch code-quality reviewer (opus)
 
-Only if Step 4 returned `APPROVED`.
+Only if Phase 3 returned `APPROVED`.
 
-```
-You are a code-quality reviewer. Review the code for Section <N>: <Title> for quality. A separate reviewer has already verified spec compliance — focus on craft.
+Dispatch a general-purpose subagent with model `opus`. Use this prompt:
+
+---QUALITY REVIEWER PROMPT START---
+You are a code-quality reviewer for Section <N>: <Title>. A separate reviewer has already verified spec compliance — focus on craft.
 
 ## Repo root
 <absolute-path>
 
-## The diff under review
-<inline diff or git show>
+## Pre-section SHA: <pre_sha>
+
+Fetch the diff yourself:
+  git diff <pre_sha>..HEAD
 
 ## What to assess
 
@@ -273,54 +280,86 @@ You are a code-quality reviewer. Review the code for Section <N>: <Title> for qu
 
 ## Output
 
-Bullet list of findings. Tag each as BLOCKING or SUGGESTION. If none: say "No issues found."
+Bullet list of findings. Tag each BLOCKING or SUGGESTION. If none: "No issues found."
 
 End with exactly one of:
 - `APPROVED`
 - `NEEDS FIXES` followed by a numbered list of BLOCKING fixes
+---QUALITY REVIEWER PROMPT END---
+
+## Phase 5 — Remediation (only if a reviewer returns NEEDS FIXES)
+
+Dispatch a fresh general-purpose subagent (same model as implementer). Pass:
+- Section title + "What to build" + acceptance criteria + architectural decisions
+- `pre_sha` and repo/plan paths
+- The specific `NEEDS FIXES` list
+
+Instruction: fix the listed items only; do not introduce changes beyond the list; re-run tests; commit.
+
+Re-dispatch the rejecting reviewer after remediation. If both reviewers eventually `APPROVED`, proceed to Phase 6. If the same reviewer rejects twice, return `status: BLOCKED`.
+
+## Phase 6 — Return structured result
+
+Your final response to the orchestrator MUST consist ONLY of this block. Do not add preamble, explanation, or prose before or after it.
+
+If approved:
+
+===RESULT===
+status: APPROVED
+section: <N>
+title: <Title>
+commits: <sha1> <sha2> ...
+tests_added: <count>
+deviations: <none | one-line description>
+concerns: <none | one-line description>
+===END===
+
+If blocked or requiring user intervention:
+
+===RESULT===
+status: BLOCKED | NEEDS_USER_INPUT
+section: <N>
+title: <Title>
+blocker: <one-line description>
+===END===
 ```
 
-### Step 6 — Remediation (only if a reviewer returns NEEDS FIXES)
+Use the `Agent` tool with `subagent_type: "general-purpose"`, model `sonnet`, and the prompt above.
 
-Dispatch a fresh remediation subagent (NOT continuing the implementer's context — fresh again). Pass it:
+### Step 3a — Handle section-controller result
 
-- Section title + "What to build" + acceptance criteria + architectural decisions
-- The diff of the just-completed work
-- The specific NEEDS FIXES list from whichever reviewer flagged it
-- Repo + plan-file paths
+Read the `===RESULT===` block from the section-controller's response.
 
-Instruction: fix the listed items; do not introduce changes beyond the list; re-run tests; commit.
+- **APPROVED:** Proceed to Step 4.
+- **BLOCKED / NEEDS_USER_INPUT:** Surface the `blocker` line to the user and stop. Do not update the PLAN file. Wait for user guidance before re-dispatching.
 
-After remediation, re-run the reviewer that rejected. If both reviewers eventually `APPROVED`, proceed. If the same reviewer rejects twice in a row, STOP and surface to the user — don't loop indefinitely.
-
-### Step 7 — Update the plan file
+### Step 4 — Update the plan file
 
 Edit the PLAN file with the Edit tool:
 
 - Flip this section's `**Status:** [ ] not started` → `**Status:** [x] complete`
-- Check off every `- [ ]` in the section's acceptance criteria → `- [x]` (reviewers validated these)
+- Check off every `- [ ]` in the section's acceptance criteria → `- [x]`
 - Fill in `### Completion log`:
-  - `Commits: <SHA-list>`
-  - `Tests added: <count or test-file path, from implementer report>`
-  - `Deviations from plan: <from implementer report; "none" if clean>`
+  - `Commits: <commits from result>`
+  - `Tests added: <tests_added from result>`
+  - `Deviations from plan: <deviations from result>`
 - Bump the `Last touched:` header to today's date
 
-Commit that single PLAN edit with message `build: complete Section <N> (<Title>)`. No attribution trailers.
+Commit with message `build: complete Section <N> (<Title>)`. No attribution trailers.
 
-### Step 8 — Continue automatically
+### Step 5 — Continue automatically
 
 Go back to Step 2 and select the next `[ ] not started` section.
 
 **Only stop the loop when:**
 
 1. No `[ ] not started` sections remain → announce completion and exit.
-2. A reviewer rejected the same section twice in a row → surface the issue to the user for guidance.
-3. The implementer returned `BLOCKED` with a blocker that requires user/plan intervention.
-4. The user interrupts the session.
+2. Section-controller returned `BLOCKED` or `NEEDS_USER_INPUT` → surface to user and wait.
+3. The user interrupts the session.
 
-The controller MAY emit a one-sentence summary to the user between sections ("Section 2 complete, moving to Section 3") but this summary NEVER enters the next section's subagent context.
+The orchestrator MAY emit a one-sentence summary between sections ("Section 2 complete, moving to Section 3") but this summary NEVER enters the next section-controller's prompt.
 
-### Step 9 — Completion announcement
+### Step 6 — Completion announcement
 
 When all sections are complete, announce exactly:
 
@@ -338,7 +377,7 @@ When all sections are complete, announce exactly:
 2. **Step 3 (sequential implementation):** Capture the pre-section SHA. Read the plan's architectural decisions + the full section block. Review the section critically — if you have questions or concerns about feasibility or ambiguity, raise them with your human partner BEFORE starting. If no concerns, proceed.
 3. **Implement sequentially:** Follow TDD per `blueprint:tdd`. Test first, watch it fail, minimal code to green, commit. Produce at least one commit per section. Do not pre-build future sections. If you hit a blocker (missing dependency, failing test, unclear instruction, plan gap), **stop and ask your human partner** — do not guess.
 4. **Manual checkpoint (spec compliance):** After implementation, explicitly re-read the section's acceptance criteria. For each criterion, write down PASS or FAIL with a justification grounded in the actual code you just wrote. Flag any extra behavior you added beyond the spec. If any criterion is FAIL or if you added extras, remediate before the next checkpoint.
-5. **Manual checkpoint (code quality):** Review the diff you just produced against the code-quality checklist in Step 5 above (idiomaticity, meaningful tests, obvious pitfalls, sizing, conventions, single responsibility). Document findings. Fix anything BLOCKING; SUGGESTION-level can be noted in the completion log.
+5. **Manual checkpoint (code quality):** Review the diff you just produced against the code-quality checklist (idiomaticity, meaningful tests, obvious pitfalls, sizing, conventions, single responsibility). Document findings. Fix anything BLOCKING; SUGGESTION-level can be noted in the completion log.
 6. **Present to your human partner:** Before updating the plan file, present the diff and both checkpoint reports. Get explicit approval, then proceed.
 7. **Step 7–9 unchanged:** update the PLAN file, commit `build: complete Section <N> (<Title>)`, continue to the next section.
 
@@ -355,6 +394,7 @@ When all sections are complete, announce exactly:
 
 | Role | Default model | Why |
 |---|---|---|
+| Section-controller | `sonnet` | Orchestration: dispatches sub-agents, parses structured results. |
 | Implementer | from section's `Model:` field; default `sonnet` | Section complexity varies; plan-author picks. |
 | Spec-compliance reviewer | `opus` | Rigorous fit-to-spec analysis. |
 | Code-quality reviewer | `opus` | Best judgment on craft and subtle pitfalls. |
@@ -389,10 +429,13 @@ Use the least powerful model that can handle each role to conserve cost and incr
 - `Last touched:` not bumped
 - Remediation loop on same reviewer runs more than twice without stopping
 - Progressing to next section while any acceptance criterion is still `- [ ]`
-- Pre-section SHA not captured before dispatch (Step 3), leaving no clean way to scope the review diff
+- Pre-section SHA not captured before dispatch (Phase 1 of section-controller), leaving no clean way to scope the review diff
 - Reviewer approving based on implementer's report without reading the actual diff
-- Implementer returned `BLOCKED` or `NEEDS_CONTEXT` and controller re-dispatched unchanged
-- Implementer returned `DONE_WITH_CONCERNS` and controller dispatched reviewer without reading the concerns
+- Orchestrator inlines `git diff` output into any subagent prompt — diffs must stay in reviewer context, fetched by the reviewer itself
+- Section-controller returns prose instead of a `===RESULT===` block — orchestrator must parse the structured block, not narrative
+- Orchestrator extracts PLAN completion details from the section-controller's narrative instead of parsing `===RESULT===`
+- Implementer returned `BLOCKED` or `NEEDS_CONTEXT` and section-controller re-dispatched unchanged
+- Implementer returned `DONE_WITH_CONCERNS` and section-controller dispatched reviewer without reading the concerns
 - Starting implementation on `main` / `master` without explicit user consent
 - In no-subagent fallback mode: skipping either manual checkpoint, or marking a section complete without presenting the diff to the user
 
