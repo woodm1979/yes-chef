@@ -1,15 +1,13 @@
 ---
-name: cook
-description: Use when executing sections from a RECIPES plan file produced by /plan-meal or /add-to-menu — runs sections one at a time with per-section subagents and 2-stage review. Part of the yes-chef suite.
+name: build
+description: Use when executing sections from a PLAN file produced by /blueprint — runs sections one at a time with per-section subagents and 2-stage review. Part of the blueprint suite.
 ---
 
-# /cook
-
-*"Yes, Chef!"*
+# /build
 
 ## Overview
 
-Executor of the yes-chef suite. Given a `-RECIPES.md` file produced by `/plan-meal` or `/add-to-menu`, this skill runs each `[ ] not started` section in order:
+Executor of the blueprint suite. Given a `-PLAN.md` file produced by `/blueprint`, this skill runs each `[ ] not started` section in order:
 
 1. Dispatch a **fresh-context** implementer subagent with ONLY the information it strictly needs.
 2. Dispatch a **spec-compliance** reviewer subagent (opus) — does the code match the section's acceptance criteria?
@@ -17,19 +15,19 @@ Executor of the yes-chef suite. Given a `-RECIPES.md` file produced by `/plan-me
 4. On approval, flip the section's `Status:` to `[x] complete`, check acceptance criteria boxes, fill in the completion log, bump `Last touched:`, commit the plan-file update.
 5. **Continue automatically to the next section** unless all sections are complete or the user interrupts.
 
-The entire workflow is resumable across sessions: the RECIPES file IS the state.
+The entire workflow is resumable across sessions: the PLAN file IS the state.
 
 If the Agent tool is unavailable in the current harness, a **no-subagent fallback mode** is provided (see "No-subagent fallback" below). The subagent path is the default and preferred mode — output quality is significantly higher with subagent dispatch.
 
 ## REQUIRED BACKGROUND
 
-**REQUIRED SUB-SKILL FOR DISPATCHED IMPLEMENTERS:** `yes-chef:tdd` — every implementer prompt must instruct the subagent to follow TDD.
+**REQUIRED SUB-SKILL FOR DISPATCHED IMPLEMENTERS:** `blueprint:tdd` — every implementer prompt must instruct the subagent to follow TDD.
 
-**Granularity:** `/cook` operates at SECTION granularity (an end-to-end tracer-bullet vertical slice). A section's implementer is expected to write multiple commits and produce several files — that's fine. The reviewers still run once per section, not once per commit.
+**Granularity:** `/build` operates at SECTION granularity (an end-to-end tracer-bullet vertical slice). A section's implementer is expected to write multiple commits and produce several files — that's fine. The reviewers still run once per section, not once per commit.
 
 ## Precedence
 
-If a repo's `CLAUDE.md`, `AGENTS.md`, or explicit user instructions conflict with this skill, user instructions win. This skill's rules apply only where the user hasn't overridden them. Read those files before dispatching the first section.
+If a repo's `CLAUDE.md`, `AGENTS.md`, or explicit user instructions conflict with this skill, user instructions win. Read those files before dispatching the first section.
 
 ## The discipline: focus, not isolation
 
@@ -58,25 +56,25 @@ If the plan file is incomplete — a section's "What to build" can't actually be
 
 ## Process
 
-### Step 1 — Locate and read the RECIPES file
+### Step 1 — Locate and read the PLAN file
 
 In order:
 
-1. If the user `@`-referenced a `-RECIPES.md` path, use it.
-2. If there's exactly one `docs/ai-plans/*-RECIPES.md`, use it.
+1. If the user `@`-referenced a `-PLAN.md` path, use it.
+2. If there's exactly one `docs/ai-plans/*-PLAN.md`, use it.
 3. If multiple candidates, `AskUserQuestion` with each + `"Let's discuss"`.
-4. If none, tell the user to run `/plan-meal` first.
+4. If none, tell the user to run `/blueprint` first.
 
-Read the RECIPES file end-to-end. Extract:
+Read the PLAN file end-to-end. Extract:
 
 - The `## Architectural decisions` block (verbatim).
 - Every `## Section N:` block.
 
-Bump `Last touched:` to today's date in the RECIPES header and commit that single-line change with message `cook: begin execution`.
+Bump `Last touched:` to today's date in the PLAN header and commit that single-line change with message `build: begin execution`.
 
 ### Step 2 — Select the next unstarted section
 
-Grep the RECIPES file for `**Status:** [ ] not started` (literal). The first match's section is the one to run.
+Grep the PLAN file for `**Status:** [ ] not started` (literal). The first match's section is the one to run.
 
 If no match: announce "All sections complete" and stop.
 
@@ -101,7 +99,7 @@ You are implementing Section <N>: <Title> of a feature plan.
 <absolute-path-to-repo-root>
 
 ## Plan file
-<absolute-path-to-RECIPES.md>
+<absolute-path-to-PLAN.md>
 
 ## Architectural decisions (binding — apply to ALL sections of this plan)
 <verbatim copy of the plan's "## Architectural decisions" block>
@@ -123,11 +121,11 @@ If you have questions about requirements, acceptance criteria, approach, or anyt
 
 ## TDD protocol
 
-Before writing any code, invoke the Skill tool with skill name `yes-chef:tdd` to load the full TDD iron-law protocol.
+Before writing any code, invoke the Skill tool with skill name `blueprint:tdd` to load the full TDD iron-law protocol.
 
 ## Discipline
 
-- Follow TDD per `yes-chef:tdd`: test first, watch it fail, minimal code to green, commit.
+- Follow TDD per `blueprint:tdd`: test first, watch it fail, minimal code to green, commit.
 - Produce at least one commit when the section is done. Multiple commits are fine.
 - Before finishing, re-read this section's acceptance criteria and verify each one is satisfied.
 - Focus on Section <N>. You MAY read the plan file for context (prior sections' completion logs and deviations are useful). You MAY grep the shipped codebase freely — that's the ground truth for interfaces earlier sections built.
@@ -199,7 +197,7 @@ git log --oneline <pre-section-sha>..HEAD   # list section's commits
 git diff <pre-section-sha>..HEAD            # combined diff for review
 ```
 
-The `<pre-section-sha>` is the commit that existed immediately before you dispatched the implementer — that's why you captured it before dispatch. For the very first section after `/cook` begins, this is `HEAD` right after the `cook: begin execution` commit from Step 1.
+The `<pre-section-sha>` is the commit that existed immediately before you dispatched the implementer — that's why you captured it before dispatch. For the very first section after `/build` begins, this is `HEAD` right after the `build: begin execution` commit from Step 1.
 
 Dispatch a reviewer with model `opus`:
 
@@ -297,7 +295,7 @@ After remediation, re-run the reviewer that rejected. If both reviewers eventual
 
 ### Step 7 — Update the plan file
 
-Edit the RECIPES file with the Edit tool:
+Edit the PLAN file with the Edit tool:
 
 - Flip this section's `**Status:** [ ] not started` → `**Status:** [x] complete`
 - Check off every `- [ ]` in the section's acceptance criteria → `- [x]` (reviewers validated these)
@@ -307,7 +305,7 @@ Edit the RECIPES file with the Edit tool:
   - `Deviations from plan: <from implementer report; "none" if clean>`
 - Bump the `Last touched:` header to today's date
 
-Commit that single RECIPES edit with message `cook: complete Section <N> (<Title>)`. No attribution trailers.
+Commit that single PLAN edit with message `build: complete Section <N> (<Title>)`. No attribution trailers.
 
 ### Step 8 — Continue automatically
 
@@ -326,23 +324,23 @@ The controller MAY emit a one-sentence summary to the user between sections ("Se
 
 When all sections are complete, announce exactly:
 
-> All sections in `<path-to-RECIPES.md>` are complete. MENU: `<path-to-MENU.md>`. Last section committed in `<SHA>`.
+> All sections in `<path-to-PLAN.md>` are complete. PRD: `<path-to-PRD.md>`. Last section committed in `<SHA>`.
 
 ## No-subagent fallback mode
 
-**When to use:** Only when the Agent tool is unavailable in the current harness (no subagent support). The subagent-driven path above is strictly preferred — quality is significantly higher with fresh-context subagents and independent reviewers. Tell your human partner that `/cook` works much better with access to subagents, and if possible switch to a harness that supports them.
+**When to use:** Only when the Agent tool is unavailable in the current harness (no subagent support). The subagent-driven path above is strictly preferred — quality is significantly higher with fresh-context subagents and independent reviewers. Tell your human partner that `/build` works much better with access to subagents, and if possible switch to a harness that supports them.
 
-**What changes:** The controller (you) performs implementation, review, and remediation sequentially in the single session. There is no fresh context per section and no independent reviewer process. The RECIPES state machine and section-level granularity are unchanged — you still run one section at a time, in order, and update the plan file between sections.
+**What changes:** The controller (you) performs implementation, review, and remediation sequentially in the single session. There is no fresh context per section and no independent reviewer process. The PLAN state machine and section-level granularity are unchanged — you still run one section at a time, in order, and update the plan file between sections.
 
 **Process in fallback mode:**
 
-1. **Step 1–2 unchanged:** locate the RECIPES file, bump `Last touched:`, commit `cook: begin execution`, then grep for the next `**Status:** [ ] not started`.
+1. **Step 1–2 unchanged:** locate the PLAN file, bump `Last touched:`, commit `build: begin execution`, then grep for the next `**Status:** [ ] not started`.
 2. **Step 3 (sequential implementation):** Capture the pre-section SHA. Read the plan's architectural decisions + the full section block. Review the section critically — if you have questions or concerns about feasibility or ambiguity, raise them with your human partner BEFORE starting. If no concerns, proceed.
-3. **Implement sequentially:** Follow TDD per `yes-chef:tdd`. Test first, watch it fail, minimal code to green, commit. Produce at least one commit per section. Do not pre-build future sections. If you hit a blocker (missing dependency, failing test, unclear instruction, plan gap), **stop and ask your human partner** — do not guess.
+3. **Implement sequentially:** Follow TDD per `blueprint:tdd`. Test first, watch it fail, minimal code to green, commit. Produce at least one commit per section. Do not pre-build future sections. If you hit a blocker (missing dependency, failing test, unclear instruction, plan gap), **stop and ask your human partner** — do not guess.
 4. **Manual checkpoint (spec compliance):** After implementation, explicitly re-read the section's acceptance criteria. For each criterion, write down PASS or FAIL with a justification grounded in the actual code you just wrote. Flag any extra behavior you added beyond the spec. If any criterion is FAIL or if you added extras, remediate before the next checkpoint.
 5. **Manual checkpoint (code quality):** Review the diff you just produced against the code-quality checklist in Step 5 above (idiomaticity, meaningful tests, obvious pitfalls, sizing, conventions, single responsibility). Document findings. Fix anything BLOCKING; SUGGESTION-level can be noted in the completion log.
 6. **Present to your human partner:** Before updating the plan file, present the diff and both checkpoint reports. Get explicit approval, then proceed.
-7. **Step 7–9 unchanged:** update the RECIPES file, commit `cook: complete Section <N> (<Title>)`, continue to the next section.
+7. **Step 7–9 unchanged:** update the PLAN file, commit `build: complete Section <N> (<Title>)`, continue to the next section.
 
 **Fallback-mode discipline:**
 
@@ -400,13 +398,13 @@ Use the least powerful model that can handle each role to conserve cost and incr
 
 ## Resumption across sessions
 
-Because the RECIPES file IS the state:
+Because the PLAN file IS the state:
 
-- Starting `/cook` in a new session works identically to continuing in the same session. The skill reads the RECIPES file, greps for the next `[ ] not started`, and runs that section. No in-memory state is required.
-- The only reminder the controller needs is the RECIPES file path — ideally supplied by the user via `@`-reference.
+- Starting `/build` in a new session works identically to continuing in the same session. The skill reads the PLAN file, greps for the next `[ ] not started`, and runs that section. No in-memory state is required.
+- The only reminder the controller needs is the PLAN file path — ideally supplied by the user via `@`-reference.
 
 ## When NOT to use
 
-- RECIPES file doesn't exist yet → run `/plan-meal` first.
+- PLAN file doesn't exist yet → run `/blueprint` first.
 - Only small, inline edits are needed (no sections) → just make them.
-- The plan uses a different format (not yes-chef `-RECIPES.md` with the `[ ] not started` / `[x] complete` state machine) → `/cook` expects that specific format.
+- The plan uses a different format (not blueprint `-PLAN.md` with the `[ ] not started` / `[x] complete` state machine) → `/build` expects that specific format.
