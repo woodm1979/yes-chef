@@ -53,6 +53,16 @@ If the conversation has insufficient context to write a meaningful PRD — **sto
 
 Do not continue.
 
+**Gap detection (only reached if context is sufficient).** After confirming there is enough context to proceed, check whether each of the following three sections was substantively addressed in the brainstorm conversation — not merely mentioned, but answered with enough detail to write that PRD section:
+
+1. **Testing approach** — what makes a good test here, key behaviors to cover, patterns to follow.
+2. **Out-of-scope** — explicit statements about what is not being built.
+3. **Open questions** — unresolved decisions or unknowns that should be tracked.
+
+For each section that is missing (no substantive answer found), ask one targeted follow-up question before proceeding. Ask questions **one at a time** — do not bundle them. Wait for the user's answer before checking the next gap or moving to Step 2.
+
+If all three sections are covered, proceed immediately to Step 2 without asking anything.
+
 ### Step 2 — New vs extend detection
 
 Scan `docs/ai-plans/` for existing `*-PRD.md` + `*-PLAN.md` pairs. Does any pair match the feature being discussed?
