@@ -68,11 +68,11 @@ Update Step 1 of `skills/blueprint/SKILL.md` to detect which standard PRD sectio
 
 ### Acceptance criteria
 
-- [ ] Step 1 of the blueprint skill, after confirming sufficient context, explicitly checks whether the brainstorm covered: testing approach, out-of-scope, and open questions.
-- [ ] For each missing section, the skill instructs Claude to ask one targeted follow-up question (one at a time) before proceeding.
-- [ ] If no sections are missing, blueprint proceeds immediately to Step 2 without asking anything.
-- [ ] The existing "insufficient context → stop" logic is preserved unchanged.
-- [ ] No new step is added — the gap-detection logic is embedded within the existing Step 1.
+- [x] Step 1 of the blueprint skill, after confirming sufficient context, explicitly checks whether the brainstorm covered: testing approach, out-of-scope, and open questions.
+- [x] For each missing section, the skill instructs Claude to ask one targeted follow-up question (one at a time) before proceeding.
+- [x] If no sections are missing, blueprint proceeds immediately to Step 2 without asking anything.
+- [x] The existing "insufficient context → stop" logic is preserved unchanged.
+- [x] No new step is added — the gap-detection logic is embedded within the existing Step 1.
 
 ### Notes for executor
 
