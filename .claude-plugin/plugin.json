@@ -1,0 +1,20 @@
+{
+  "name": "yes-chef",
+  "description": "Chef-themed planning and execution suite for Claude Code: plan-meal, cook, add-to-menu, and TDD",
+  "version": "5.0.7",
+  "author": {
+    "name": "woodm1979",
+    "email": "matt@lyvi.com"
+  },
+  "homepage": "https://github.com/woodm1979/yes-chef",
+  "repository": "https://github.com/woodm1979/yes-chef",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "tdd",
+    "debugging",
+    "collaboration",
+    "best-practices",
+    "workflows"
+  ]
+}

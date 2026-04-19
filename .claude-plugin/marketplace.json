@@ -1,0 +1,20 @@
+{
+  "name": "yes-chef-dev",
+  "description": "Chef-themed planning and execution suite for Claude Code",
+  "owner": {
+    "name": "woodm1979",
+    "email": "matt@lyvi.com"
+  },
+  "plugins": [
+    {
+      "name": "yes-chef",
+      "description": "Chef-themed planning and execution suite for Claude Code: plan-meal, cook, add-to-menu, and TDD",
+      "version": "5.0.7",
+      "source": "./",
+      "author": {
+        "name": "woodm1979",
+        "email": "matt@lyvi.com"
+      }
+    }
+  ]
+}
