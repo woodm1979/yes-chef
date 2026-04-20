@@ -2,7 +2,7 @@
 
 > PRD: ./2026-04-19-brainstorm-grill-me-revamp-PRD.md
 > Executor: /build
-> Created: 2026-04-19  |  Last touched: 2026-04-19 (extended)
+> Created: 2026-04-19  |  Last touched: 2026-04-19
 
 ## Architectural decisions
 
