@@ -2,7 +2,7 @@
 
 > PRD: ./2026-04-20-grill-me-alias-PRD.md
 > Executor: /build
-> Created: 2026-04-20  |  Last touched: 2026-04-20
+> Created: 2026-04-20  |  Last touched: 2026-04-20 (execution begun)
 
 ## Architectural decisions
 
