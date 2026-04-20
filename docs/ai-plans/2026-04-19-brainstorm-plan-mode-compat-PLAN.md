@@ -22,7 +22,7 @@
 
 ## Section 1: Make brainstorm plan-mode compatible
 
-**Status:** [ ] not started
+**Status:** [x] complete
 **Model:** haiku
 **User stories covered:** 1, 2
 
@@ -32,12 +32,12 @@ Edit `skills/brainstorm/SKILL.md` to (a) remove the `Skill` tool invocation from
 
 ### Acceptance criteria
 
-- [ ] When the user picks "Write new PRD + PLAN" or "Extend existing PRD + PLAN" at the artifact gate, the skill no longer calls the `Skill` tool — instead it outputs a message telling the user to invoke `/blueprint`
-- [ ] The artifact gate still uses `AskUserQuestion` with the same four options (Write new, Extend existing, No files, Let's discuss)
-- [ ] A plan-mode compatibility note appears in the skill before the UX rules section, stating that all steps are read-only and the skill should proceed normally when plan mode is active
-- [ ] The "Let's discuss" path still works: discuss inline, then re-ask via `AskUserQuestion`
-- [ ] The "No files — end here" path still works: end cleanly with no skill invocation
-- [ ] No other sections of the skill are modified
+- [x] When the user picks "Write new PRD + PLAN" or "Extend existing PRD + PLAN" at the artifact gate, the skill no longer calls the `Skill` tool — instead it outputs a message telling the user to invoke `/blueprint`
+- [x] The artifact gate still uses `AskUserQuestion` with the same four options (Write new, Extend existing, No files, Let's discuss)
+- [x] A plan-mode compatibility note appears in the skill before the UX rules section, stating that all steps are read-only and the skill should proceed normally when plan mode is active
+- [x] The "Let's discuss" path still works: discuss inline, then re-ask via `AskUserQuestion`
+- [x] The "No files — end here" path still works: end cleanly with no skill invocation
+- [x] No other sections of the skill are modified
 
 ### Notes for executor
 
@@ -47,7 +47,6 @@ Edit `skills/brainstorm/SKILL.md` to (a) remove the `Skill` tool invocation from
 
 ### Completion log
 
-<!-- Executor fills in after section completes -->
-- Commits:
-- Tests added:
-- Deviations from plan:
+- Commits: 378efd9
+- Tests added: 0
+- Deviations from plan: none
