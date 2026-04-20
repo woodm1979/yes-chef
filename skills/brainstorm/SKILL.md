@@ -19,7 +19,14 @@ Primary intake skill of the blueprint suite. Interviews the user through a relen
 
 ## Plan-mode compatibility
 
-This skill is fully compatible with Claude Code's plan mode. All three steps — Step 1 (Grill-me loop), Step 2 (Decision summary), and Step 3 (Artifact gate) — are read-only: they produce no files, make no commits, and invoke no tools that write to disk. When plan mode is active, Claude should **not** switch to plan-mode behavior (listing intended actions instead of acting); proceed normally through all three steps as written.
+This skill is compatible with Claude Code's plan mode. Steps 1–3 use only `AskUserQuestion` (permitted in plan mode) and produce no files or commits.
+
+**Critical sequencing:** Do NOT call `ExitPlanMode` until after Step 3 (Artifact gate) `AskUserQuestion` has been answered. The artifact gate is the final required question of this skill — treating the end of Step 2 as "done planning" and calling `ExitPlanMode` early is a bug.
+
+After the artifact gate is answered:
+- If **Write new PRD + PLAN** or **Extend**: tell the user "Run `/blueprint` now — it will read this conversation and write the plan files." Then call `ExitPlanMode`.
+- If **No files**: call `ExitPlanMode` immediately.
+- If **Let's discuss**: continue inline (still using `AskUserQuestion`), then re-ask the artifact gate before calling `ExitPlanMode`.
 
 ## UX rules (non-negotiable)
 
