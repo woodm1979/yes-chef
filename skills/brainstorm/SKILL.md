@@ -17,6 +17,10 @@ Primary intake skill of the blueprint suite. Interviews the user through a relen
 | `/blueprint` | File-creation — writes PRD.md + PLAN.md from brainstorm context |
 | `/build` | Executor — runs each section in a fresh subagent with 2-stage review |
 
+## Plan-mode compatibility
+
+This skill is fully compatible with Claude Code's plan mode. All three steps — Step 1 (Grill-me loop), Step 2 (Decision summary), and Step 3 (Artifact gate) — are read-only: they produce no files, make no commits, and invoke no tools that write to disk. When plan mode is active, Claude should **not** switch to plan-mode behavior (listing intended actions instead of acting); proceed normally through all three steps as written.
+
 ## UX rules (non-negotiable)
 
 These rules apply to EVERY user-facing message during intake. Violating any of them means the skill has been violated.
@@ -69,7 +73,7 @@ Call `AskUserQuestion`:
 > - `No files — end here` — The summary above is the output. Nothing is written or committed.
 > - `Let's discuss` — Continue the conversation inline, then re-ask.
 
-If the user chooses **Write new PRD + PLAN** or **Extend existing PRD + PLAN**, invoke the `Skill` tool with `skill: "blueprint:blueprint"`. It will read this conversation's context and handle writing or extending the plan files.
+If the user chooses **Write new PRD + PLAN** or **Extend existing PRD + PLAN**, tell the user: "Run `/blueprint` now — it will read this conversation's context and handle writing or extending the plan files."
 
 If **No files — end here**, end cleanly. The decision summary is the output.
 
