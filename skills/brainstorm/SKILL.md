@@ -69,9 +69,7 @@ Call `AskUserQuestion`:
 > - `No files — end here` — The summary above is the output. Nothing is written or committed.
 > - `Let's discuss` — Continue the conversation inline, then re-ask.
 
-If the user chooses **Write new PRD + PLAN** or **Extend existing PRD + PLAN**, end with:
-
-> **REQUIRED NEXT SKILL:** Invoke `/blueprint`. It will read this conversation's context and handle writing or extending the plan files.
+If the user chooses **Write new PRD + PLAN** or **Extend existing PRD + PLAN**, invoke the `Skill` tool with `skill: "blueprint:blueprint"`. It will read this conversation's context and handle writing or extending the plan files.
 
 If **No files — end here**, end cleanly. The decision summary is the output.
 
