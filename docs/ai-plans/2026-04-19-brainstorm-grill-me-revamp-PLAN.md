@@ -2,7 +2,7 @@
 
 > PRD: ./2026-04-19-brainstorm-grill-me-revamp-PRD.md
 > Executor: /build
-> Created: 2026-04-19  |  Last touched: 2026-04-19
+> Created: 2026-04-19  |  Last touched: 2026-04-19 (extended)
 
 ## Architectural decisions
 
@@ -85,3 +85,35 @@ Update Step 1 of `skills/blueprint/SKILL.md` to detect which standard PRD sectio
 - Commits: 42b6639
 - Tests added: none (prose-only skill file)
 - Deviations from plan: none
+
+---
+
+## Section 3: Auto-invoke /blueprint from brainstorm artifact gate
+
+**Status:** [ ] not started
+**Model:** haiku
+**User stories covered:** 5, 6, 7
+
+### What to build
+
+Edit `skills/brainstorm/SKILL.md` to replace the "REQUIRED NEXT SKILL" prose message in the artifact gate with an instruction to call the `Skill` tool directly with `blueprint:blueprint` when the user picks "Write new PRD + PLAN" or "Extend existing PRD + PLAN". The "No files — end here" and "Let's discuss" paths remain unchanged.
+
+### Acceptance criteria
+
+- [ ] When the user picks "Write new PRD + PLAN" or "Extend existing PRD + PLAN", the skill instructs Claude to call the `Skill` tool with `skill: "blueprint:blueprint"` rather than printing a "REQUIRED NEXT SKILL" message.
+- [ ] When the user picks "No files — end here", the session ends cleanly with no skill invocation.
+- [ ] When the user picks "Let's discuss", the conversation continues inline and the artifact gate question is re-asked — no skill is invoked until a final choice is made.
+- [ ] The "REQUIRED NEXT SKILL: Invoke /blueprint" prose is removed from the skill file.
+
+### Notes for executor
+
+- The only file to change is `skills/brainstorm/SKILL.md` — specifically the "If the user chooses Write new PRD + PLAN or Extend existing PRD + PLAN" block at the end of Step 3 (artifact gate).
+- The `Skill` tool call should pass `skill: "blueprint:blueprint"` — that is the registered skill name in the harness.
+- No changes to `skills/blueprint/SKILL.md` or `skills/build/SKILL.md`.
+
+### Completion log
+
+<!-- Executor fills in after section completes -->
+- Commits:
+- Tests added:
+- Deviations from plan:

@@ -2,7 +2,7 @@
 
 > Status: draft
 > Plan: ./2026-04-19-brainstorm-grill-me-revamp-PLAN.md
-> Created: 2026-04-19  |  Last touched: 2026-04-19
+> Created: 2026-04-19  |  Last touched: 2026-04-19 (extended)
 
 ## Problem
 
@@ -27,6 +27,9 @@ Structured completeness (testing approach, out-of-scope, open questions) moves t
 2. As a `/brainstorm` user, I want code exploration to happen only when a question actually requires it, so I don't wait for a full recon when it's irrelevant.
 3. As a `/brainstorm` user, I want the interview to keep probing until every decision branch is resolved, so I arrive at `/blueprint` with genuine shared understanding.
 4. As a `/blueprint` user, I want it to detect gaps left by the brainstorm and ask targeted follow-ups before writing, so the PRD is complete without requiring a perfect brainstorm.
+5. As a user who completes a brainstorm, I want `/blueprint` invoked automatically when I choose to write or extend a plan, so I don't have to remember to do it myself.
+6. As a user who chooses "No files — end here", I want the session to end cleanly with no follow-up skill invoked.
+7. As a user who chooses "Let's discuss" at the artifact gate, I want to continue the conversation without losing any brainstorm context.
 
 ## Architecture & module sketch
 
@@ -41,7 +44,6 @@ Structured completeness (testing approach, out-of-scope, open questions) moves t
 
 ## Out of scope
 
-- Auto-invoking `/blueprint` from the brainstorm artifact gate (deferred; user will handle separately).
 - Changes to `/build` or `/tdd` skills.
 - Changes to the artifact gate options or decision summary format in brainstorm.
 
