@@ -160,11 +160,17 @@ If **Yes**, build the issue body from the committed PRD using the template in **
 
 ### Step 10 — Handoff
 
-End with exactly this message (adjust paths):
+End with exactly this message (substitute the real file paths):
 
-> **REQUIRED NEXT SKILL:** Invoke `/build` to execute the sections in `docs/ai-plans/<date>-<slug>-PLAN.md`. Each section will run in a fresh subagent with 2-stage review.
+> **REQUIRED NEXT SKILL:** Run `/build` with the PLAN file below. Each section will run in a fresh subagent with 2-stage review.
+>
+> ```
+> /build docs/ai-plans/<date>-<slug>-PLAN.md
+> ```
+>
+> PRD: `docs/ai-plans/<date>-<slug>-PRD.md`
 
-Do not invoke `/build` yourself.
+The fenced block is the exact command the user can copy-paste after a `/clear`. The PRD line lets them reference the requirements doc in the new session. Do not invoke `/build` yourself.
 
 ## File formats
 
