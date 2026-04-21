@@ -2,7 +2,7 @@
 
 > PRD: ./2026-04-21-build-post-completion-PRD.md
 > Executor: /build
-> Created: 2026-04-21  |  Last touched: 2026-04-21
+> Created: 2026-04-21  |  Last touched: 2026-04-21 (Section 1 complete)
 
 ## Architectural decisions
 
@@ -23,7 +23,7 @@
 
 ## Section 1: Conditional simplify step
 
-**Status:** [ ] not started
+**Status:** [x] complete
 **Model:** haiku
 **User stories covered:** 1, 2, 3
 
@@ -33,9 +33,9 @@ Add **Step 6a** to `skills/build/SKILL.md`, inserted between the existing Step 6
 
 ### Acceptance criteria
 
-- [ ] When all sections are complete and the branch contains at least one non-`.md` changed file, `/build` invokes `/simplify` via the Skill tool with the changed non-md file list passed as `args`.
-- [ ] When all sections are complete and the branch contains only `.md` file changes, `/build` skips Step 6a silently (no message, no invocation).
-- [ ] The `/simplify` invocation receives only the non-markdown changed files, not the entire codebase.
+- [x] When all sections are complete and the branch contains at least one non-`.md` changed file, `/build` invokes `/simplify` via the Skill tool with the changed non-md file list passed as `args`.
+- [x] When all sections are complete and the branch contains only `.md` file changes, `/build` skips Step 6a silently (no message, no invocation).
+- [x] The `/simplify` invocation receives only the non-markdown changed files, not the entire codebase.
 
 ### Notes for executor
 
@@ -46,10 +46,9 @@ Add **Step 6a** to `skills/build/SKILL.md`, inserted between the existing Step 6
 
 ### Completion log
 
-<!-- Executor fills in after section completes -->
-- Commits:
-- Tests added:
-- Deviations from plan:
+- Commits: a1d8807
+- Tests added: 0 (skill file edit — no executable tests)
+- Deviations from plan: none
 
 ---
 
