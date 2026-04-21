@@ -94,7 +94,7 @@ Slim `skills/build/SKILL.md` down to a thin orchestrator loop. Replace the inlin
 
 ## Section 3: Add `scripts/afk-build.sh`
 
-**Status:** [ ] not started
+**Status:** [x] complete
 **Model:** haiku
 **User stories covered:** 3, 4
 
@@ -104,16 +104,16 @@ Write `scripts/afk-build.sh`, a static executable bash script. It loops `docker 
 
 ### Acceptance criteria
 
-- [ ] `scripts/afk-build.sh` exists and is executable (`chmod +x`)
-- [ ] Script exits with a clear error message (exit 1) if `ANTHROPIC_API_KEY` is not set
-- [ ] Script exits with a clear error message (exit 1) if `docker` is not found or `docker sandbox` is unavailable
-- [ ] Script accepts an optional PLAN file path as `$1`; if omitted, auto-discovers using the same logic as `/build` (single `docs/ai-plans/*-PLAN.md` candidate, else error)
-- [ ] Each iteration runs: `docker sandbox run claude . -- --dangerously-skip-permissions --print --output-format stream-json "invoke blueprint:build-step"` with streaming output piped through `jq` to the terminal in real time
-- [ ] After each iteration, the script counts `[ ] not started` sections in the PLAN file before and after to detect progress
-- [ ] If progress was made and sections remain, the loop continues
-- [ ] If no `[ ] not started` sections remain: prints `"Build complete."`, runs `/usr/bin/say "Build complete"`, exits 0
-- [ ] If count is unchanged after an iteration (no progress): prints `"Build blocked. Check terminal output above for reason."`, runs `/usr/bin/say "Build blocked"`, exits 1
-- [ ] A comment block at the top of the script documents the `ANTHROPIC_API_KEY` prereq and the `docker sandbox` requirement
+- [x] `scripts/afk-build.sh` exists and is executable (`chmod +x`)
+- [x] Script exits with a clear error message (exit 1) if `ANTHROPIC_API_KEY` is not set
+- [x] Script exits with a clear error message (exit 1) if `docker` is not found or `docker sandbox` is unavailable
+- [x] Script accepts an optional PLAN file path as `$1`; if omitted, auto-discovers using the same logic as `/build` (single `docs/ai-plans/*-PLAN.md` candidate, else error)
+- [x] Each iteration runs: `docker sandbox run claude . -- --dangerously-skip-permissions --print --output-format stream-json "invoke blueprint:build-step"` with streaming output piped through `jq` to the terminal in real time
+- [x] After each iteration, the script counts `[ ] not started` sections in the PLAN file before and after to detect progress
+- [x] If progress was made and sections remain, the loop continues
+- [x] If no `[ ] not started` sections remain: prints `"Build complete."`, runs `/usr/bin/say "Build complete"`, exits 0
+- [x] If count is unchanged after an iteration (no progress): prints `"Build blocked. Check terminal output above for reason."`, runs `/usr/bin/say "Build blocked"`, exits 1
+- [x] A comment block at the top of the script documents the `ANTHROPIC_API_KEY` prereq and the `docker sandbox` requirement
 
 ### Notes for executor
 
@@ -123,7 +123,6 @@ Write `scripts/afk-build.sh`, a static executable bash script. It loops `docker 
 
 ### Completion log
 
-<!-- Executor fills in after section completes -->
-- Commits:
-- Tests added:
-- Deviations from plan:
+- Commits: 302ccf1
+- Tests added: 0
+- Deviations from plan: none
