@@ -4,6 +4,10 @@
 
 Pairs with [`woodm1979/less-opinionated-superpowers`](https://github.com/woodm1979/less-opinionated-superpowers) for debugging, code review, and git worktree workflows.
 
+## Working on skills
+
+Always read skill files from the repo source (`skills/*/SKILL.md`), never from the plugin cache (`~/.claude/plugins/cache/`). The cache is a snapshot of the last-pushed version and won't reflect local edits.
+
 ## Release discipline
 
 Before pushing to GitHub, bump the version in both `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`. Users of the plugin receive updates only when the version string changes.
