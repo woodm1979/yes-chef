@@ -104,6 +104,27 @@ When all sections are complete, announce exactly:
 
 > All sections in `<path-to-PLAN.md>` are complete. PRD: `<path-to-PRD.md>`. Last section committed in `<SHA>`.
 
+### Step 6a — Conditional simplify
+
+After the Step 6 announcement, determine whether the branch contains any non-markdown code changes:
+
+```
+git diff --name-only $(git merge-base HEAD main) HEAD
+```
+
+If `main` is not a valid ref, retry with `master`.
+
+Filter the resulting file list to exclude any path ending in `.md`.
+
+- If the filtered list is **empty**: skip this step silently (no message, no invocation).
+- If the filtered list is **non-empty**: invoke the `simplify` skill via the Skill tool:
+  - `skill: "simplify"`
+  - `args: "Scope your review to these branch-modified files only: <space-separated file list>"`
+
+### Step 6b — Future considerations generation and handoff
+
+_Added by Section 2 of this plan._
+
 ## No-subagent fallback mode
 
 **When to use:** Only when the Agent tool is unavailable in the current harness (no subagent support). The subagent-driven path above is strictly preferred — quality is significantly higher with fresh-context subagents and independent reviewers. Tell your human partner that `/build` works much better with access to subagents, and if possible switch to a harness that supports them.
