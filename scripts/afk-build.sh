@@ -68,6 +68,24 @@ fi
 
 echo "Using PLAN file: $PLAN_FILE"
 
+# --- Parse Worktree: field from PLAN header ---
+
+WORK_DIR="."
+WORKTREE_PATH=$(grep "^> Worktree:" "$PLAN_FILE" | sed 's/^> Worktree: *//' || true)
+
+if [ -n "$WORKTREE_PATH" ]; then
+  if [ ! -d "$WORKTREE_PATH" ]; then
+    echo "Error: Worktree directory not found: $WORKTREE_PATH" >&2
+    echo "recreate the worktree (e.g. via EnterWorktree name: <branch>) and retry." >&2
+    exit 1
+  fi
+  WORK_DIR="$WORKTREE_PATH"
+  PLAN_FILENAME="$(basename "$PLAN_FILE")"
+  PLAN_FILE="$WORK_DIR/docs/ai-plans/$PLAN_FILENAME"
+  echo "Using worktree: $WORK_DIR"
+  echo "Using PLAN file (worktree copy): $PLAN_FILE"
+fi
+
 # --- Helpers ---
 
 count_not_started() {
@@ -91,7 +109,7 @@ while true; do
 
   # Run one build-step iteration in a fresh Docker sandbox process.
   # Streaming output is piped through jq in real time; full JSON is saved for debugging.
-  docker sandbox run claude . -- \
+  docker sandbox run claude "$WORK_DIR" -- \
     --dangerously-skip-permissions \
     --print \
     --output-format stream-json \
