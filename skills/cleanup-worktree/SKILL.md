@@ -77,7 +77,7 @@ If the feature branch is **not** in the merged list:
 
 ### Step 7 — Remove worktree
 
-Trigger removal using the `ExitWorktree` tool if available, otherwise call `WorktreeRemove` for the worktree path. If neither tool is available in the current harness, fall back to calling `scripts/worktree-remove "$WORKTREE_DIR"` via Bash.
+Trigger removal by calling `WorktreeRemove` for the worktree path. If `WorktreeRemove` is not available in the current harness, fall back to calling `scripts/worktree-remove "$WORKTREE_DIR"` via Bash.
 
 The `WorktreeRemove` event triggers the Section 2 hook (`hooks/worktree-remove.sh`), which removes the worktree directory and prunes stale refs.
 

@@ -89,6 +89,8 @@ Repo root: <absolute-path-to-repo-root>
 PLAN file: <absolute-path-to-PLAN.md>
 ```
 
+**Worktree note:** Subagents dispatched via the `Agent` tool do not inherit `EnterWorktree` context from the orchestrator. If a worktree was entered in Step 1, use the **worktree path** as `Repo root` (not the main repo root) and the worktree's copy of the PLAN file as `PLAN file`. This ensures all git operations in the subagent land on the feature branch.
+
 Use the `Agent` tool with `subagent_type: "general-purpose"`, model `sonnet`, and the prompt above.
 
 ### Step 3a — Read the completion signal

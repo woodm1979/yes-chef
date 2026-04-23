@@ -182,6 +182,12 @@ Call `EnterWorktree name: <worktree-name>` (using the name determined in Step 6.
 
 If the user chose **Reuse as-is** in Step 6.5, call `EnterWorktree path: <worktree-path>` instead.
 
+If `EnterWorktree` is unavailable in the current harness, warn the user:
+
+> "`EnterWorktree` is not available — the worktree has not been created. Run `scripts/worktree-create <worktree-name>` from the repo root to create it manually before running `/build`."
+
+Then skip to Step 9.
+
 ### Step 9 — Optional GitHub issue
 
 After the commit, call `AskUserQuestion`:
