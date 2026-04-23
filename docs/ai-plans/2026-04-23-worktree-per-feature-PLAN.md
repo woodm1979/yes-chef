@@ -62,7 +62,7 @@ Ship `hooks/worktree-create.sh` and `scripts/worktree-create` in the plugin. The
 
 ## Section 2: WorktreeRemove hook + script
 
-**Status:** [ ] not started
+**Status:** [x] complete
 **Model:** haiku
 **User stories covered:** 5
 
@@ -72,11 +72,11 @@ Ship `hooks/worktree-remove.sh` and `scripts/worktree-remove` in the plugin. The
 
 ### Acceptance criteria
 
-- [ ] After the hook fires on an existing worktree path, `git worktree list` no longer shows that worktree
-- [ ] The worktree directory no longer exists on disk
-- [ ] When called with a path that does not exist, exits 0 with a message to stderr — no error
-- [ ] Returns the branch name (from `git symbolic-ref --short HEAD`) on stdout before removal
-- [ ] Hook script is executable and referenced correctly from `hooks/hooks.json`
+- [x] After the hook fires on an existing worktree path, `git worktree list` no longer shows that worktree
+- [x] The worktree directory no longer exists on disk
+- [x] When called with a path that does not exist, exits 0 with a message to stderr — no error
+- [x] Returns the branch name (from `git symbolic-ref --short HEAD`) on stdout before removal
+- [x] Hook script is executable and referenced correctly from `hooks/hooks.json`
 
 ### Notes for executor
 
@@ -85,10 +85,9 @@ Ship `hooks/worktree-remove.sh` and `scripts/worktree-remove` in the plugin. The
 
 ### Completion log
 
-<!-- Executor fills in after section completes -->
-- Commits:
-- Tests added:
-- Deviations from plan:
+- Commits: d4fe568
+- Tests added: 7
+- Deviations from plan: none
 
 ---
 
